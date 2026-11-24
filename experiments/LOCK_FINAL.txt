@@ -1,0 +1,6 @@
+Locked 2026-11-23T16:42:47+08:00. Final Beijing test configs (developed on Xi'an only): A0, A2 (stacked context), MIRT (2-D GPCM, smooth=1.0, global taus from inner OOF), MIRT+prior (unsupervised EM prior adaptation), each with ROM and ROM+geometry stage-1. Coherence calibration dropped (harmful on Xi'an transfer). All results will be reported.
+8428024c943051b7357c5d9f3f3e584f1a60ee39116176ed22d0502223722d06  final_ext.py
+95b12b98e2b2f235843d669e5dc41fff92bea68c510c0419267577348cb05461  irt.py
+4a0a5650b719f692c0aac09c14fd6b0be7f042679a0e90003592c02d794c9e72  mirt.py
+ead52042f419d4067118f4251f64e78d163635a59a07c75a68c66bf0f0833cf7  exp_a.py
+b0cd03379176f7a753edd73e0c56ce42249de3eb6e5f0991dd1bd6f5db5bd2b5  common.py

@@ -1,0 +1,5 @@
+Locked 2026-11-23T15:19:42+08:00 before any external evaluation of fusion configs.
+Configs A0-A3 as in exp_a.py (RF 300 trees, leaf 3, balanced; geometry: corr subspace p=3 arm/p=2 hand, projection distance to class prototypes + top-3 eigen share; context: stage-2 multinomial LR C=1 on own probs + mean expected score of other items + arm/hand block means; inner grouped OOF).
+Dev CV results: A0 1.748, A1 1.545, A2 1.090, A3 1.167 (MAE, 27-item total).
+ead52042f419d4067118f4251f64e78d163635a59a07c75a68c66bf0f0833cf7  exp_a.py
+b0cd03379176f7a753edd73e0c56ce42249de3eb6e5f0991dd1bd6f5db5bd2b5  common.py
