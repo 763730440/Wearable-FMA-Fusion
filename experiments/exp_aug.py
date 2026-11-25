@@ -51,42 +51,43 @@ def fit(P, Rb, Yb, grp, scheme):
     return [train_aug(make, P, Rb, Yb, grp, s, scheme) for s in (0, 1, 2)]
 
 
-res = {}
-for scheme in SCHEMES:
-    out = {'cv': {}, 'transfer': {}, 'beijing': {}, 'sim': {}}
-    fold_models = {}; cvp = np.zeros_like(Y)
-    for f in range(5):
-        sp = C[f'cv{f}']; tr, te = sp['tr'], sp['te']
-        fold_models[f] = fit(sp['oof'], R[tr], Y[tr], GRP[tr], scheme)
-        cvp[te] = LF.predict_proba(fold_models[f], LF.tokens(sp['Pte'], R[te])).argmax(2)
-    out['cv'] = metrics(cvp, Y)
-    pp = np.load('paper_preds.npz'); out['cv']['vs_IRT-2D'] = boot_diff(cvp, pp['cv_IRT-2D'], Y, GRP)
-    print(KIND, scheme, 'cv', round(out['cv']['acc'], 4), round(out['cv']['mae'], 3), flush=True)
-    for s in ('c1to2', 'c2to1'):
-        sp = C[s]; tr, te = sp['tr'], sp['te']
-        p = LF.predict_proba(fit(sp['oof'], R[tr], Y[tr], GRP[tr], scheme), LF.tokens(sp['Pte'], R[te])).argmax(2)
-        out['transfer'][s] = metrics(p, Y[te])
-    print(KIND, scheme, 'transfer', {s: round(v['mae'], 3) for s, v in out['transfer'].items()}, flush=True)
-    pla = PIDX; Yp = YALL[pla]; Rp = M[pla].astype(bool); pid = D.iloc[pla].pid.to_numpy(); tp = Yp.sum(1); sevp = tp < 40
-    e = np.load('ext_probs_rom.npz'); rfb = e['P'].argmax(2)
-    p = LF.predict_proba(fit(e['oof'], R, Y, GRP, scheme), LF.tokens(e['P'], Rp)).argmax(2)
-    m = metrics(p, Yp); er = p.sum(1) - tp
-    m.update(sev_mae=float(np.abs(er[sevp]).mean()), sev_bias=float(er[sevp].mean()), mild_mae=float(np.abs(er[~sevp]).mean()),
-             mild_bias=float(er[~sevp].mean()), vs_RF=boot_diff(rfb, p, Yp, pid))
-    out['beijing'] = m
-    print(KIND, scheme, 'beijing', round(m['acc'], 4), round(m['mae'], 3), 'sev bias', round(m['sev_bias'], 2), flush=True)
-    for mech in ('MNAR', 'MCAR'):
-        for prate in (0.0, 0.25, 0.5, 0.75, 1.0):
-            acc, mae = [], []
-            for seed in range(3):
-                rng = np.random.default_rng(seed); pred = np.zeros_like(Y)
-                for f in range(5):
-                    sp = C[f'cv{f}']; te = sp['te']; yt = Y[te]; u = rng.random(yt.shape)
-                    drop = (u < np.where(yt == 0, prate, 0.02)) if mech == 'MNAR' else (u < prate)
-                    pred[te] = LF.predict_proba(fold_models[f], LF.tokens(sp['Pte'], R[te] & ~drop)).argmax(2)
-                acc.append((pred == Y).mean()); mae.append(np.abs(pred.sum(1) - Y.sum(1)).mean())
-            out['sim'][f'{mech}_{prate}'] = dict(acc=float(np.mean(acc)), mae=float(np.mean(mae)))
-        print(KIND, scheme, mech, {k: round(v['mae'], 2) for k, v in out['sim'].items() if k.startswith(mech)}, flush=True)
-    res[scheme] = out
-    json.dump(res, open(f'res_aug_{KIND}.json', 'w'), indent=1)
-print('saved')
+if __name__ == '__main__':
+    res = {}
+    for scheme in SCHEMES:
+        out = {'cv': {}, 'transfer': {}, 'beijing': {}, 'sim': {}}
+        fold_models = {}; cvp = np.zeros_like(Y)
+        for f in range(5):
+            sp = C[f'cv{f}']; tr, te = sp['tr'], sp['te']
+            fold_models[f] = fit(sp['oof'], R[tr], Y[tr], GRP[tr], scheme)
+            cvp[te] = LF.predict_proba(fold_models[f], LF.tokens(sp['Pte'], R[te])).argmax(2)
+        out['cv'] = metrics(cvp, Y)
+        pp = np.load('paper_preds.npz'); out['cv']['vs_IRT-2D'] = boot_diff(cvp, pp['cv_IRT-2D'], Y, GRP)
+        print(KIND, scheme, 'cv', round(out['cv']['acc'], 4), round(out['cv']['mae'], 3), flush=True)
+        for s in ('c1to2', 'c2to1'):
+            sp = C[s]; tr, te = sp['tr'], sp['te']
+            p = LF.predict_proba(fit(sp['oof'], R[tr], Y[tr], GRP[tr], scheme), LF.tokens(sp['Pte'], R[te])).argmax(2)
+            out['transfer'][s] = metrics(p, Y[te])
+        print(KIND, scheme, 'transfer', {s: round(v['mae'], 3) for s, v in out['transfer'].items()}, flush=True)
+        pla = PIDX; Yp = YALL[pla]; Rp = M[pla].astype(bool); pid = D.iloc[pla].pid.to_numpy(); tp = Yp.sum(1); sevp = tp < 40
+        e = np.load('ext_probs_rom.npz'); rfb = e['P'].argmax(2)
+        p = LF.predict_proba(fit(e['oof'], R, Y, GRP, scheme), LF.tokens(e['P'], Rp)).argmax(2)
+        m = metrics(p, Yp); er = p.sum(1) - tp
+        m.update(sev_mae=float(np.abs(er[sevp]).mean()), sev_bias=float(er[sevp].mean()), mild_mae=float(np.abs(er[~sevp]).mean()),
+                 mild_bias=float(er[~sevp].mean()), vs_RF=boot_diff(rfb, p, Yp, pid))
+        out['beijing'] = m
+        print(KIND, scheme, 'beijing', round(m['acc'], 4), round(m['mae'], 3), 'sev bias', round(m['sev_bias'], 2), flush=True)
+        for mech in ('MNAR', 'MCAR'):
+            for prate in (0.0, 0.25, 0.5, 0.75, 1.0):
+                acc, mae = [], []
+                for seed in range(3):
+                    rng = np.random.default_rng(seed); pred = np.zeros_like(Y)
+                    for f in range(5):
+                        sp = C[f'cv{f}']; te = sp['te']; yt = Y[te]; u = rng.random(yt.shape)
+                        drop = (u < np.where(yt == 0, prate, 0.02)) if mech == 'MNAR' else (u < prate)
+                        pred[te] = LF.predict_proba(fold_models[f], LF.tokens(sp['Pte'], R[te] & ~drop)).argmax(2)
+                    acc.append((pred == Y).mean()); mae.append(np.abs(pred.sum(1) - Y.sum(1)).mean())
+                out['sim'][f'{mech}_{prate}'] = dict(acc=float(np.mean(acc)), mae=float(np.mean(mae)))
+            print(KIND, scheme, mech, {k: round(v['mae'], 2) for k, v in out['sim'].items() if k.startswith(mech)}, flush=True)
+        res[scheme] = out
+        json.dump(res, open(f'res_aug_{KIND}.json', 'w'), indent=1)
+    print('saved')

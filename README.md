@@ -22,7 +22,7 @@ Place the data as follows (paths are relative to the repository root):
 | `data/rehab/Rehab_assessment/` | Raw assessment folder of the public REHAB dataset (Lv et al., *Sci Data* 2026): `d01_raw_data/`, `label.npy` |
 | `data/rehab/brs.xlsx` | REHAB clinical score table (sheet `data_set1`: 33 FMA-UE item scores, Brunnstrom stages, assessment dates) |
 | `data/rehab/Rehabilitation_data.xlsx` | Case report forms of the development trial (patient IDs, center, visit dates, item scores) |
-| `data/beijing/01*/` | Beijing test data (not public; available from the corresponding author on reasonable request). The Beijing scripts (`final_ext*.py`, `dl_run.py`) and the Beijing parts of `eval_all.py`, `exp_learned.py` and `exp_aug.py` cannot be run without it. |
+| `data/beijing/01*/` | Beijing test data (not public; available from the corresponding author on reasonable request). The Beijing scripts (`final_ext*.py`, `dl_run.py`) and the Beijing parts of `eval_all.py`, `exp_learned.py`, `exp_aug.py` and `exp_batch.py` cannot be run without it. |
 
 ## Reproducing the results
 
@@ -38,6 +38,7 @@ Place the data as follows (paths are relative to the repository root):
 | Main results | `experiments/eval_all.py` | `results_paper.json`, `paper_preds.npz` | Tables 2-5, Fig 4 |
 | Transformer and GCN | `experiments/exp_learned.py` | `results_learned.json` | Table 6 |
 | Transformer and GCN with missing-data augmentation (MCAR, MNAR, mixed) | `experiments/exp_aug.py transformer`, `exp_aug.py gcn` | `res_aug_transformer.json`, `res_aug_gcn.json` | Table 6 (augmented rows); Supplementary Table S5 |
+| Deployment conditions: latent fusion with small unlabeled batches; learned fusers with TENT and entropy selection | `experiments/exp_batch.py malt`, `exp_batch.py gcn`, `exp_batch.py transformer` | `res_batch_malt.json`, `res_batch_gcn.json`, `res_batch_transformer.json` | Supplementary Table S7 |
 | Classical fusion, uncertainty, sensor-block failure, extra ablations | `experiments/exp_unc.py`, `exp_unc_learned.py`, `sum_unc.py` | `res_unc.json` | Tables 3, 7; Supplementary Table S1; Fig 5B |
 | Shortened (adaptive) assessment | `experiments/exp_short.py`, `sum_short.py` | `res_short.json` | Table 8, Fig 5A |
 | Controlled missingness | `experiments/exp_sim.py` | `res_sim.json` | Section 5.4, Fig 3 |

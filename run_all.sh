@@ -23,6 +23,7 @@ python experiments/final_ext2.py             # (Beijing)
 python experiments/eval_all.py
 python experiments/exp_learned.py
 for k in gcn transformer; do python experiments/exp_aug.py $k; done   # learned fusers with missing-data augmentation
+for k in malt gcn transformer; do python experiments/exp_batch.py $k; done   # deployment conditions: batch size, TENT, entropy selection
 python experiments/exp_unc.py cv0 cv1 cv2 cv3 cv4 c1to2 c2to1
 python experiments/exp_unc_learned.py
 python experiments/sum_unc.py
