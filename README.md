@@ -43,9 +43,10 @@ Place the data as follows (paths are relative to the repository root):
 | Repeated cross-validation (partitions 2-5) | `experiments/exp_repcv.py 1 2 3 4`, `sum_repcv.py` | `repcv_*.pkl`, `res_repcv.json` | Supplementary Table S2, Section 5.11 |
 | Few-shot site calibration between the Xi'an hospitals | `experiments/exp_fewshot_xian.py c1to2 1,2,3,5,8,12 10` (and `c2to1`) | `fs_<split>_<m>.json` | Supplementary Table S3, Section 5.3 |
 | Proposition 2 illustration | `experiments/prop2_check.py` | `res_prop2.json` | Section 5.7 |
+| Item hierarchy | `experiments/hier_cv.py` | `hier_cv.json` | Fig 2 |
 | Figures | `figures/*.py` | `fig*.png/pdf` | Figs 2-5 |
 
-Figure 2A reads `hier_cv.json`, which is not produced by the scripts in this repository.
+Figure 2A reads `hier_cv.json`, produced by `experiments/hier_cv.py` (item hierarchy: each item predicted from the clinician scores of the other items).
 
 ## Neural baselines
 

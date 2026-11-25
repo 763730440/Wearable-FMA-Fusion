@@ -33,5 +33,6 @@ python experiments/exp_repcv.py 1 2 3 4
 python experiments/sum_repcv.py
 for d in c1to2 c2to1; do python experiments/exp_fewshot_xian.py $d 1,2,3,5,8,12 10; done
 python experiments/prop2_check.py
+python experiments/hier_cv.py
 # figures
 for f in figures/fig1.py figures/figs_data.py figures/fig4.py figures/fig5.py; do python $f; done
