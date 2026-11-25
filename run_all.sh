@@ -22,6 +22,7 @@ python experiments/final_ext2.py             # (Beijing)
 # main results, learned fusion, uncertainty
 python experiments/eval_all.py
 python experiments/exp_learned.py
+for k in gcn transformer; do python experiments/exp_aug.py $k; done   # learned fusers with missing-data augmentation
 python experiments/exp_unc.py cv0 cv1 cv2 cv3 cv4 c1to2 c2to1
 python experiments/exp_unc_learned.py
 python experiments/sum_unc.py
