@@ -1,5 +1,5 @@
 import sys, numpy as np, pandas as pd, pickle
-sys.path.insert(0,'work')
+
 from xc_io import *
 def rng(x): return float(np.percentile(x,95)-np.percentile(x,5)) if len(x)>2 else np.nan
 def angle_unwrap(x): return np.degrees(np.unwrap(np.radians(x)))
@@ -45,4 +45,4 @@ if __name__=='__main__':
         r['cohort']='PLA'; r['pid']=s['pid']; r['date']=s['date']
         for it in ITEMS: r[f'y{it}']=s['labels'][it]
         r['fma33']=float(sum(s['labels'].values())); R.append(r)
-    D=pd.DataFrame(R); D.to_pickle('feats.pkl'); print(D.shape); print(CFG)
+    D=pd.DataFrame(R); D.to_pickle('work/feats.pkl'); print(D.shape); print(CFG)

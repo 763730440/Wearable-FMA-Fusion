@@ -1,7 +1,8 @@
 """Fig 5: shortened assessment and selective scoring."""
 import json, pickle, numpy as np
 import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot as plt
-exec(open('figs_data.py').read().split('# ---------------- Fig 2')[0])
+import os
+exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'figs_data.py')).read().split('# ---------------- Fig 2')[0])
 from common import *
 r = RIDX; Y = YALL[r]; T = Y.sum(1)
 S = json.load(open('res_short.json')); KS = [3, 5, 7, 9, 12, 15, 18, 21, 27]

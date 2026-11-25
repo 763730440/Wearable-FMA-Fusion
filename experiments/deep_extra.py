@@ -1,6 +1,6 @@
 """Deep baselines for the fusion paper (Xi'an only): flat TCN (no cross-item context) in pooled CV, and
 flat TCN / HT-Net in center transfer. Same training code and settings as the APMR study (3 seeds averaged)."""
-import sys, time; sys.path.insert(0, 'work')
+import sys, time
 import numpy as np, pandas as pd
 from htnet import *
 from xc_io import ITEMS

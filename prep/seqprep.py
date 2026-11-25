@@ -56,7 +56,7 @@ def item_seq(get,it,segment):
     return resample(x,T).astype(np.float32)
 if __name__=='__main__':
     seg=True
-    D=pd.read_pickle('feats.pkl')
+    D=pd.read_pickle('work/feats.pkl')
     ARM=np.zeros((len(D),27,T,19),np.float32); HAND=np.zeros((len(D),27,T,5),np.float32); M=np.zeros((len(D),27),bool)
     for r,(c,pid) in enumerate(zip(D.cohort,D.pid)):
         if c=='REHAB':
@@ -70,5 +70,5 @@ if __name__=='__main__':
             M[r,j]=True
             if x.shape[1]==19: ARM[r,j]=x
             else: HAND[r,j]=x
-    np.savez_compressed('seqs.npz',ARM=ARM,HAND=HAND,M=M)
+    np.savez_compressed('work/seqs.npz',ARM=ARM,HAND=HAND,M=M)
     print(M.mean(), M.sum(0))

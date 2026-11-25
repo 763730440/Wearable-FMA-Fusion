@@ -66,7 +66,7 @@ if __name__ == '__main__':
     per = {s: split_preds(s) for s in SPL}; print('fusion done', flush=True)
     # deep baselines
     z = np.load('work/rehab_cv_hier.npz'); htcv = deep_cls(z['P1'], z['P2'])
-    zf = np.load('deep_cv_flat.npz'); flcv = deep_cls(zf['P1'], zf['P2'])
+    zf = np.load('work/deep_cv_flat.npz'); flcv = deep_cls(zf['P1'], zf['P2'])
     lrcv = np.load('work/rehab_cv_lr.npy').astype(int)
     names = [k for k in per['cv0'] if not k.startswith('_')]
     cvp = {k: np.zeros_like(Y) for k in names}
@@ -91,7 +91,7 @@ if __name__ == '__main__':
         te = C['rom'][s]['te']; Yt = Y[te]; gt = GRP[te]; tt = Yt.sum(1); mild = tt >= 40
         P = {n: per[s][n] for n in names}
         for kind in ('flat', 'hier'):
-            zz = np.load(f'deep_{s}_{kind}.npz'); P['Flat TCN' if kind == 'flat' else 'HT-Net'] = deep_cls(zz['P1'], zz['P2'])
+            zz = np.load(f'work/deep_{s}_{kind}.npz'); P['Flat TCN' if kind == 'flat' else 'HT-Net'] = deep_cls(zz['P1'], zz['P2'])
         res['transfer'][s] = {}
         for n, p in P.items():
             m = metrics(p, Yt); m['mild_mae'] = float(np.abs(p.sum(1) - tt)[mild].mean()); m['sev_mae'] = float(np.abs(p.sum(1) - tt)[~mild].mean())

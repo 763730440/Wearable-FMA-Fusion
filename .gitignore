@@ -1,0 +1,11 @@
+data/
+work/
+*.pkl
+*.npz
+*.npy
+res*.json
+results_*.json
+fs_*.json
+fig*.png
+fig*.pdf
+__pycache__/

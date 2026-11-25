@@ -11,10 +11,7 @@ for s in [f'cv{k}' for k in range(5)] + ['c1to2', 'c2to1']:
         make = (lambda q: LF.ItemTransformer(seed=q)) if k == 'transformer' else (lambda q, A=LF.item_graph(Y[tr]): LF.ItemGCN(A, seed=q))
         ms = [LF._train_one(make, Xtr, Y[tr], GRP[tr], q) for q in (0, 1, 2)]
         def pred(Rt):
-            X = LF.tokens(sp['Pte'], Rt); pr = 0
-            for m in ms:
-                lg = m.forward(X).v; ex = np.exp(lg - lg.max(-1, keepdims=True)); pr = pr + ex / ex.sum(-1, keepdims=True)
-            return pr / len(ms)
+            return LF.predict_proba(ms, LF.tokens(sp['Pte'], Rt))
         o['prob'][k] = pred(R[te])
         for blk, nm in ((0, 'arm'), (1, 'glove')): o['block'].setdefault(nm, {})[k] = pred(R[te] & (DIM != blk)[None]).argmax(2)
     out[s] = o; print(s, flush=True)

@@ -60,10 +60,7 @@ for mech in ('MNAR', 'MCAR'):
                 drop = (u < np.where(yt == 0, p, 0.02)) if mech == 'MNAR' else (u < p); Rt = R[te] & ~drop
                 X = LF.tokens(sp['Pte'], Rt)
                 for k in KINDS:
-                    pr = 0
-                    for m in fold_models[f][k]:
-                        lg = m.forward(X).v; ex = np.exp(lg - lg.max(-1, keepdims=True)); pr = pr + ex / ex.sum(-1, keepdims=True)
-                    preds[k][te] = pr.argmax(2)
+                    preds[k][te] = LF.predict_proba(fold_models[f][k], X).argmax(2)
             for k in KINDS:
                 acc[k].append((preds[k] == Y).mean()); mae[k].append(np.abs(preds[k].sum(1) - Y.sum(1)).mean())
         res['sim'][f'{mech}_{p}'] = {k: dict(acc=float(np.mean(acc[k])), mae=float(np.mean(mae[k]))) for k in KINDS}
