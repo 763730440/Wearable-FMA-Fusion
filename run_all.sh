@@ -22,8 +22,8 @@ python experiments/final_ext2.py             # (Beijing)
 # main results, learned fusion, uncertainty
 python experiments/eval_all.py
 python experiments/exp_learned.py
-for k in gcn transformer; do python experiments/exp_aug.py $k; done   # learned fusers with missing-data augmentation
-for k in malt gcn transformer; do python experiments/exp_batch.py $k; done   # deployment conditions: batch size, TENT, entropy selection
+for k in gcn transformer; do python experiments/exp_aug.py $k; done
+for k in malt gcn transformer; do python experiments/exp_batch.py $k; done
 python experiments/exp_unc.py cv0 cv1 cv2 cv3 cv4 c1to2 c2to1
 python experiments/exp_unc_learned.py
 python experiments/sum_unc.py
@@ -36,5 +36,5 @@ python experiments/sum_repcv.py
 for d in c1to2 c2to1; do python experiments/exp_fewshot_xian.py $d 1,2,3,5,8,12 10; done
 python experiments/prop2_check.py
 python experiments/hier_cv.py
-# figures
-for f in figures/fig1.py figures/figs_data.py figures/fig4.py figures/fig5.py; do python $f; done
+# Data-driven figures only. Figure 1 is supplied separately as a conceptual schematic.
+for f in figures/figs_data.py figures/fig4.py figures/fig5.py; do python $f; done
