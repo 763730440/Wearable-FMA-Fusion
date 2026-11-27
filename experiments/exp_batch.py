@@ -55,19 +55,20 @@ if WHAT == 'malt':
         res[key] = float(np.mean([np.abs(pp.sum(1) - Y.sum(1)).mean() for pp in d.values()]))
         print(key, round(res[key], 3), flush=True)
     # Beijing
-    e = np.load('ext_probs_rom.npz'); P, oof = e['P'], e['oof']; MR = R0
-    g = MGPCM(smooth=1.0).fit(Y); to, tc = fit_tau(g, oof, Y, mask=MR); rho0 = rho_from_labels(Y, MR)
-    for n in SIZES:
-        maes, sev = [], []
-        for rep in range(1 if n == 'all' else 20):
-            order = np.random.default_rng(rep).permutation(len(pla)); pred = np.zeros_like(Yp)
-            batches = [order] if n == 'all' else [order[i:i + n] for i in range(0, len(pla), n)]
-            for b in batches:
-                rho = estimate_rho(g, P[b], Rp[b], rho0, to, tc)
-                pred[b] = fuse_m(g, P[b], Rp[b], rho, to, tc).argmax(2)
-            er = pred.sum(1) - tp; maes.append(np.abs(er).mean()); sev.append(er[tp < 40].mean())
-        res[f'beijing_n{n}'] = dict(mae=float(np.mean(maes)), sev_bias=float(np.mean(sev)))
-        print('beijing', n, res[f'beijing_n{n}'], flush=True)
+    if HAS_BEIJING:   # Beijing (private cohort)
+        e = np.load('ext_probs_rom.npz'); P, oof = e['P'], e['oof']; MR = R0
+        g = MGPCM(smooth=1.0).fit(Y); to, tc = fit_tau(g, oof, Y, mask=MR); rho0 = rho_from_labels(Y, MR)
+        for n in SIZES:
+            maes, sev = [], []
+            for rep in range(1 if n == 'all' else 20):
+                order = np.random.default_rng(rep).permutation(len(pla)); pred = np.zeros_like(Yp)
+                batches = [order] if n == 'all' else [order[i:i + n] for i in range(0, len(pla), n)]
+                for b in batches:
+                    rho = estimate_rho(g, P[b], Rp[b], rho0, to, tc)
+                    pred[b] = fuse_m(g, P[b], Rp[b], rho, to, tc).argmax(2)
+                er = pred.sum(1) - tp; maes.append(np.abs(er).mean()); sev.append(er[tp < 40].mean())
+            res[f'beijing_n{n}'] = dict(mae=float(np.mean(maes)), sev_bias=float(np.mean(sev)))
+            print('beijing', n, res[f'beijing_n{n}'], flush=True)
 else:
     import torch
     import learned_fusion as LF
@@ -110,11 +111,12 @@ else:
     for key, d in pred.items():
         res[key] = float(np.mean([np.abs(pp.sum(1) - Y.sum(1)).mean() for pp in d.values()]))
         print(key, round(res[key], 3), flush=True)
-    e = np.load('ext_probs_rom.npz'); X = LF.tokens(e['P'], Rp)
-    bm = {s: fit(e['oof'], R0, Y, GRP, s) for s in ('mcar', 'mnar', 'mixed')}
-    pa = LF.predict_proba(bm['mcar'], X); pb = LF.predict_proba(bm['mnar'], X)
-    for name, pr in (('tent_mixed', tent(bm['mixed'], X)), ('entropy_select', pa if ent(pa) < ent(pb) else pb)):
-        er = pr.argmax(2).sum(1) - tp
-        res[f'beijing_{name}'] = dict(mae=float(np.abs(er).mean()), sev_bias=float(er[tp < 40].mean()), chose=('mcar' if ent(pa) < ent(pb) else 'mnar') if name == 'entropy_select' else None)
-        print('beijing', name, res[f'beijing_{name}'], flush=True)
+    if HAS_BEIJING:   # Beijing (private cohort)
+        e = np.load('ext_probs_rom.npz'); X = LF.tokens(e['P'], Rp)
+        bm = {s: fit(e['oof'], R0, Y, GRP, s) for s in ('mcar', 'mnar', 'mixed')}
+        pa = LF.predict_proba(bm['mcar'], X); pb = LF.predict_proba(bm['mnar'], X)
+        for name, pr in (('tent_mixed', tent(bm['mixed'], X)), ('entropy_select', pa if ent(pa) < ent(pb) else pb)):
+            er = pr.argmax(2).sum(1) - tp
+            res[f'beijing_{name}'] = dict(mae=float(np.abs(er).mean()), sev_bias=float(er[tp < 40].mean()), chose=('mcar' if ent(pa) < ent(pb) else 'mnar') if name == 'entropy_select' else None)
+            print('beijing', name, res[f'beijing_{name}'], flush=True)
 json.dump(res, open(f'res_batch_{WHAT}.json', 'w'), indent=1); print('saved')

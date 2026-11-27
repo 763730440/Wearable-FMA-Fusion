@@ -32,17 +32,18 @@ for s in ('c1to2', 'c2to1'):
         p = fit_predict(k, sp['oof'], R[tr], Y[tr], GRP[tr], sp['Pte'], R[te]).argmax(2); m = metrics(p, Y[te])
         tt = Y[te].sum(1); mild = tt >= 40; m['mild_mae'] = float(np.abs(p.sum(1) - tt)[mild].mean()); res['transfer'][s][k] = m
     print(s, {k: (round(v['acc'], 4), round(v['mae'], 3)) for k, v in res['transfer'][s].items()}, flush=True)
-# Beijing
-pla = PIDX; Yp = YALL[pla]; Rp = M[pla].astype(bool); pid = D.iloc[pla].pid.to_numpy(); tp = Yp.sum(1); sevp = tp < 40
-e = np.load('ext_probs_rom.npz'); rfb = e['P'].argmax(2)
-for k in KINDS:
-    p = fit_predict(k, e['oof'], R, Y, GRP, e['P'], Rp).argmax(2)
-    for name, q in ((k, p), (k + ' + zero rule', np.where(Rp, p, 0))):
-        m = metrics(q, Yp); er = q.sum(1) - tp
-        m.update(sev_mae=float(np.abs(er[sevp]).mean()), sev_bias=float(er[sevp].mean()), mild_mae=float(np.abs(er[~sevp]).mean()), mild_bias=float(er[~sevp].mean()),
-                 vs_RF=boot_diff(rfb, q, Yp, pid))
-        res['beijing'][name] = m
-print('beijing', {k: (round(v['acc'], 4), round(v['mae'], 3)) for k, v in res['beijing'].items()}, flush=True)
+# Beijing (skipped when the private Beijing cohort is not available)
+if HAS_BEIJING:
+    pla = PIDX; Yp = YALL[pla]; Rp = M[pla].astype(bool); pid = D.iloc[pla].pid.to_numpy(); tp = Yp.sum(1); sevp = tp < 40
+    e = np.load('ext_probs_rom.npz'); rfb = e['P'].argmax(2)
+    for k in KINDS:
+        p = fit_predict(k, e['oof'], R, Y, GRP, e['P'], Rp).argmax(2)
+        for name, q in ((k, p), (k + ' + zero rule', np.where(Rp, p, 0))):
+            m = metrics(q, Yp); er = q.sum(1) - tp
+            m.update(sev_mae=float(np.abs(er[sevp]).mean()), sev_bias=float(er[sevp].mean()), mild_mae=float(np.abs(er[~sevp]).mean()), mild_bias=float(er[~sevp].mean()),
+                     vs_RF=boot_diff(rfb, q, Yp, pid))
+            res['beijing'][name] = m
+    print('beijing', {k: (round(v['acc'], 4), round(v['mae'], 3)) for k, v in res['beijing'].items()}, flush=True)
 # controlled missingness (same protocol and seeds as exp_sim.py); models refitted per fold once, inputs perturbed
 fold_models = {}
 for f in range(5):

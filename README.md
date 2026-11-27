@@ -28,7 +28,7 @@ The development dataset is described in Lv et al., *Scientific Data* (2026), [do
 
 The code retains the device/data item numbering. Figure 2 converts the relevant device item numbers to the standard FMA-UE numbering used in the manuscript (`DEV2STD` in `figures/figs_data.py`). The instrumented outcome comprises 27 items, with a total score of 0–54; the six remaining items are scored by the therapist.
 
-**Access limitation:** the full pipeline currently expects both the development and Beijing datasets. Beijing data are required for the external-cohort analyses and for running the pipeline as supplied; the private cohort cannot be reproduced without authorized access. Do not commit identifiable patient records or restricted source files to the public repository.
+**Access limitation:** the Beijing cohort is optional. If `data/beijing/01*` is absent, `run_all.sh` skips the Beijing steps (marked † below and `(Beijing)` in the script), and all development analyses (Xi'an cross-validation, center transfer, controlled missingness, uncertainty, sensor failure, shortened assessment, repeated partitions, few-shot calibration, Proposition 2, Figures 2, 3 and 5) run from the REHAB data alone. Table 5, Supplementary Table S6, Figure 4 and the Beijing columns of Table 6 and Supplementary Table S7 require authorized access to the Beijing cohort. Do not commit identifiable patient records or restricted source files to the public repository.
 
 ## Installation and execution
 
@@ -78,7 +78,7 @@ The reported environment was Python 3.13, NumPy 2.5, SciPy 1.18, scikit-learn 1.
 
 ## Beijing configuration locks
 
-The files `experiments/LOCK_A.txt`, `experiments/LOCK_FINAL.txt`, and `experiments/LOCK_MA.txt` contain time-stamped SHA-256 records for the configurations frozen at the corresponding stages of the Beijing evaluation. The locked fusion files `exp_a.py`, `irt.py`, `mirt.py`, `missirt.py`, `final_ext.py`, and `final_ext2.py` match their recorded hashes. `fusion/common.py` was modified after the lock to adjust file paths for release; its current hash therefore differs from the lock record. The neural baselines are not covered by these locks. See Section 4.2 and Supplementary Table S6 for the two-stage evaluation protocol and the distinction between locked and post hoc comparisons.
+The files `experiments/LOCK_A.txt`, `experiments/LOCK_FINAL.txt`, and `experiments/LOCK_MA.txt` contain time-stamped SHA-256 records for the configurations frozen at the corresponding stages of the Beijing evaluation. The locked fusion files `exp_a.py`, `irt.py`, `mirt.py`, `missirt.py`, `final_ext.py`, and `final_ext2.py` match their recorded hashes. `fusion/common.py` was modified after the lock to adjust file paths for release and to make the Beijing cohort optional; its current hash therefore differs from the lock record. `prep/xc_io.py` and `prep/subspaces.py` were likewise changed for release (optional Beijing data; `subspaces.pkl` is also written to the repository root, where the locked `exp_a.py` reads it); neither is part of the lock records. The neural baselines are not covered by these locks. See Section 4.2 and Supplementary Table S6 for the two-stage evaluation protocol and the distinction between locked and post hoc comparisons.
 
 ## License
 

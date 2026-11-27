@@ -68,14 +68,15 @@ if __name__ == '__main__':
             p = LF.predict_proba(fit(sp['oof'], R[tr], Y[tr], GRP[tr], scheme), LF.tokens(sp['Pte'], R[te])).argmax(2)
             out['transfer'][s] = metrics(p, Y[te])
         print(KIND, scheme, 'transfer', {s: round(v['mae'], 3) for s, v in out['transfer'].items()}, flush=True)
-        pla = PIDX; Yp = YALL[pla]; Rp = M[pla].astype(bool); pid = D.iloc[pla].pid.to_numpy(); tp = Yp.sum(1); sevp = tp < 40
-        e = np.load('ext_probs_rom.npz'); rfb = e['P'].argmax(2)
-        p = LF.predict_proba(fit(e['oof'], R, Y, GRP, scheme), LF.tokens(e['P'], Rp)).argmax(2)
-        m = metrics(p, Yp); er = p.sum(1) - tp
-        m.update(sev_mae=float(np.abs(er[sevp]).mean()), sev_bias=float(er[sevp].mean()), mild_mae=float(np.abs(er[~sevp]).mean()),
-                 mild_bias=float(er[~sevp].mean()), vs_RF=boot_diff(rfb, p, Yp, pid))
-        out['beijing'] = m
-        print(KIND, scheme, 'beijing', round(m['acc'], 4), round(m['mae'], 3), 'sev bias', round(m['sev_bias'], 2), flush=True)
+        if HAS_BEIJING:   # Beijing locked test (private cohort)
+            pla = PIDX; Yp = YALL[pla]; Rp = M[pla].astype(bool); pid = D.iloc[pla].pid.to_numpy(); tp = Yp.sum(1); sevp = tp < 40
+            e = np.load('ext_probs_rom.npz'); rfb = e['P'].argmax(2)
+            p = LF.predict_proba(fit(e['oof'], R, Y, GRP, scheme), LF.tokens(e['P'], Rp)).argmax(2)
+            m = metrics(p, Yp); er = p.sum(1) - tp
+            m.update(sev_mae=float(np.abs(er[sevp]).mean()), sev_bias=float(er[sevp].mean()), mild_mae=float(np.abs(er[~sevp]).mean()),
+                     mild_bias=float(er[~sevp].mean()), vs_RF=boot_diff(rfb, p, Yp, pid))
+            out['beijing'] = m
+            print(KIND, scheme, 'beijing', round(m['acc'], 4), round(m['mae'], 3), 'sev bias', round(m['sev_bias'], 2), flush=True)
         for mech in ('MNAR', 'MCAR'):
             for prate in (0.0, 0.25, 0.5, 0.75, 1.0):
                 acc, mae = [], []

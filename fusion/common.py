@@ -2,7 +2,7 @@ import sys, warnings
 warnings.filterwarnings('ignore')
 sys.path.insert(0, 'work')
 import numpy as np, pandas as pd
-from xc_io import ITEMS
+from xc_io import ITEMS, HAS_BEIJING
 
 D = pd.read_pickle('work/feats.pkl')
 S = np.load('work/seqs.npz'); ARM, HAND, M = S['ARM'], S['HAND'], S['M']

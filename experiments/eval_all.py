@@ -97,32 +97,33 @@ if __name__ == '__main__':
             m = metrics(p, Yt); m['mild_mae'] = float(np.abs(p.sum(1) - tt)[mild].mean()); m['sev_mae'] = float(np.abs(p.sum(1) - tt)[~mild].mean())
             if n != 'RF': m['vs_RF'] = boot_diff(P['RF'], p, Yt, gt)
             res['transfer'][s][n] = m
-    # Beijing (locked)
-    pla = PIDX; Yp = YALL[pla]; Rp = M[pla].astype(bool); pid = D.iloc[pla].pid.to_numpy(); tp = Yp.sum(1); sevp = tp < 40
+    # Beijing (locked); skipped when the private Beijing cohort is not available
     BJ = {}
-    for t in ('rom', 'geo'):
-        e = np.load(f'ext_probs_{t}.npz'); P, oof = e['P'], e['oof']; sfx = '' if t == 'rom' else '+geo'
-        BJ['RF' + sfx] = P.argmax(2)
-        BJ['RF' + sfx + ' + zero rule'] = np.where(Rp, P.argmax(2), 0)
-        BJ['Stacking' + sfx] = stage2(oof, Y, P)
-        P0 = P.copy(); P0[~Rp] = [0.98, 0.01, 0.01]
-        BJ['Stacking' + sfx + ' + zero rule'] = np.where(Rp, stage2(oof, Y, P0), 0)
-        g2 = MGPCM(smooth=1.0).fit(Y); to, tc = fit_tau(g2, oof, Y, mask=R)
-        BJ['IRT-2D' + sfx] = fuse(g2, P, to, tc, mask=Rp)[0].argmax(2)
-        rho0 = rho_from_labels(Y, R); rho = estimate_rho(g2, P, Rp, rho0, to, tc)
-        BJ['MA-IRT' + sfx] = fuse_m(g2, P, Rp, rho, to, tc).argmax(2); res['beijing_rho_' + t] = [float(x) for x in rho]
-    zf = np.load('work/dl_R2P_flat.npz'); zh = np.load('work/dl_R2P_hier.npz')
-    BJ['Flat TCN'] = deep_cls(zf['P1'], zf['P2']); BJ['HT-Net'] = deep_cls(zh['P1'], zh['P2'])
-    BJ['HT-Net + zero rule'] = np.where(Rp, BJ['HT-Net'], 0)
-    res['beijing_true_rho'] = [float(((~Rp) & (Yp == k)).sum() / (Yp == k).sum()) for k in range(3)]
-    res['beijing_missing'] = dict(sev=float((~Rp[sevp]).mean()), mild=float((~Rp[~sevp]).mean()), n_sev=int(sevp.sum()), n=int(len(tp)),
-                                  missing_scored0=int(((~Rp) & (Yp == 0)).sum()), missing_total=int((~Rp).sum()),
-                                  xian_missing_scored0=int(((~R) & (Y == 0)).sum()), xian_missing_total=int((~R).sum()))
-    for n, p in BJ.items():
-        m = metrics(p, Yp); e = p.sum(1) - tp
-        m.update(sev_mae=float(np.abs(e)[sevp].mean()), sev_bias=float(e[sevp].mean()), mild_mae=float(np.abs(e)[~sevp].mean()), mild_bias=float(e[~sevp].mean()))
-        if n != 'RF': m['vs_RF'] = boot_diff(BJ['RF'], p, Yp, pid)
-        res['beijing'][n] = m
+    if HAS_BEIJING:
+        pla = PIDX; Yp = YALL[pla]; Rp = M[pla].astype(bool); pid = D.iloc[pla].pid.to_numpy(); tp = Yp.sum(1); sevp = tp < 40
+        for t in ('rom', 'geo'):
+            e = np.load(f'ext_probs_{t}.npz'); P, oof = e['P'], e['oof']; sfx = '' if t == 'rom' else '+geo'
+            BJ['RF' + sfx] = P.argmax(2)
+            BJ['RF' + sfx + ' + zero rule'] = np.where(Rp, P.argmax(2), 0)
+            BJ['Stacking' + sfx] = stage2(oof, Y, P)
+            P0 = P.copy(); P0[~Rp] = [0.98, 0.01, 0.01]
+            BJ['Stacking' + sfx + ' + zero rule'] = np.where(Rp, stage2(oof, Y, P0), 0)
+            g2 = MGPCM(smooth=1.0).fit(Y); to, tc = fit_tau(g2, oof, Y, mask=R)
+            BJ['IRT-2D' + sfx] = fuse(g2, P, to, tc, mask=Rp)[0].argmax(2)
+            rho0 = rho_from_labels(Y, R); rho = estimate_rho(g2, P, Rp, rho0, to, tc)
+            BJ['MA-IRT' + sfx] = fuse_m(g2, P, Rp, rho, to, tc).argmax(2); res['beijing_rho_' + t] = [float(x) for x in rho]
+        zf = np.load('work/dl_R2P_flat.npz'); zh = np.load('work/dl_R2P_hier.npz')
+        BJ['Flat TCN'] = deep_cls(zf['P1'], zf['P2']); BJ['HT-Net'] = deep_cls(zh['P1'], zh['P2'])
+        BJ['HT-Net + zero rule'] = np.where(Rp, BJ['HT-Net'], 0)
+        res['beijing_true_rho'] = [float(((~Rp) & (Yp == k)).sum() / (Yp == k).sum()) for k in range(3)]
+        res['beijing_missing'] = dict(sev=float((~Rp[sevp]).mean()), mild=float((~Rp[~sevp]).mean()), n_sev=int(sevp.sum()), n=int(len(tp)),
+                                      missing_scored0=int(((~Rp) & (Yp == 0)).sum()), missing_total=int((~Rp).sum()),
+                                      xian_missing_scored0=int(((~R) & (Y == 0)).sum()), xian_missing_total=int((~R).sum()))
+        for n, p in BJ.items():
+            m = metrics(p, Yp); e = p.sum(1) - tp
+            m.update(sev_mae=float(np.abs(e)[sevp].mean()), sev_bias=float(e[sevp].mean()), mild_mae=float(np.abs(e)[~sevp].mean()), mild_bias=float(e[~sevp].mean()))
+            if n != 'RF': m['vs_RF'] = boot_diff(BJ['RF'], p, Yp, pid)
+            res['beijing'][n] = m
     np.savez('paper_preds.npz', **{('cv_' + k): v for k, v in cvp.items()}, **{('bj_' + k): v for k, v in BJ.items()})
     json.dump(res, open('results_paper.json', 'w'), indent=1)
     print('saved')

@@ -3,6 +3,9 @@
 set -e
 export PYTHONPATH=prep:fusion:experiments OMP_NUM_THREADS=1
 mkdir -p work
+# The Beijing cohort is private. Without data/beijing/01*, the Beijing steps are skipped and every
+# development (Xi'an) analysis still runs from the public REHAB data.
+if ls -d data/beijing/01* >/dev/null 2>&1; then BEIJING=1; else BEIJING=0; echo "data/beijing not found: skipping Beijing steps"; fi
 # data preparation
 python prep/link_rehab.py
 python prep/feats.py
@@ -15,10 +18,12 @@ python experiments/cache_s1.py geo
 python experiments/lr_cv.py
 python experiments/rehab_cv.py
 python experiments/deep_extra.py
-python experiments/dl_run.py                 # (Beijing)
+if [ $BEIJING = 1 ]; then python experiments/dl_run.py; fi            # (Beijing)
 # Beijing locked test of the fusion methods
-python experiments/final_ext.py              # (Beijing)
-python experiments/final_ext2.py             # (Beijing)
+if [ $BEIJING = 1 ]; then
+  python experiments/final_ext.py              # (Beijing)
+  python experiments/final_ext2.py             # (Beijing)
+fi
 # main results, learned fusion, uncertainty
 python experiments/eval_all.py
 python experiments/exp_learned.py
@@ -37,4 +42,6 @@ for d in c1to2 c2to1; do python experiments/exp_fewshot_xian.py $d 1,2,3,5,8,12 
 python experiments/prop2_check.py
 python experiments/hier_cv.py
 # Data-driven figures only. Figure 1 is supplied separately as a conceptual schematic.
-for f in figures/figs_data.py figures/fig4.py figures/fig5.py; do python $f; done
+python figures/figs_data.py
+python figures/fig5.py
+if [ $BEIJING = 1 ]; then python figures/fig4.py; fi   # Figure 4 shows the Beijing test

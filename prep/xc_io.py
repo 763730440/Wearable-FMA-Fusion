@@ -2,7 +2,9 @@ import numpy as np, glob, os, re
 from datetime import datetime
 ITEMS=[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,19,20,21,22,24,25,26,27,28,29,30,31]
 RB='data/rehab/Rehab_assessment'
-PB=glob.glob('data/beijing/01*')[0]
+_PB=glob.glob('data/beijing/01*')
+PB=_PB[0] if _PB else None          # Beijing cohort is private; the development analyses run without it
+HAS_BEIJING=PB is not None
 C1=['pitch1','yaw1','roll1','ax1','ay1','az1','mx1','my1','mz1','wx1','wy1','wz1']
 C2=['pitch2-pitch1','pitch2','yaw2','roll2','ax2','ay2','az2','mx2','my2','mz2','wx2','wy2','wz2']
 C3=['pitch3','pitch3-pitch1','f1','f12','fAll']
@@ -31,6 +33,7 @@ def pla_signal(path):
     fs=float(np.median(full)) if full else len(rows)/max(1,(t1-t0).seconds+1)
     return a, fs
 def pla_sessions():
+    if PB is None: return []
     out=[]
     for d in sorted(os.listdir(PB)):
         p=os.path.join(PB,d)
